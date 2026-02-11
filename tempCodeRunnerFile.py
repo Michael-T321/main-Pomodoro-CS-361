@@ -85,17 +85,20 @@ line_count = count_printed_lines(welcomeScreen)
 welcomeScreen()
 
 def workSession(time):
+
     workTitle = text2art(" Work Session ")
+
     if workTitle.endswith("\n"):
         workTitle = workTitle[:-1]
+
     centerTitle = "\n".join(line.center(lineWidth) for line in workTitle.split("\n"))
     print(line)
     print(centerTitle)
     print(line)
     print(f"| Enter the corresponding number to select!".ljust(lineWidth-1) + "|")
     print(f"|".ljust(lineWidth - 1) + "|")
-    print(f"| State: RUNNING".ljust(lineWidth-1) + "|")
-    print(f"| Time Remaining: {time}".ljust(lineWidth-1) + "|")
+    print(f"| State: RUNNING".ljust(lineWidth-1) + "|")  # ADD THIS LINE
+   # print(f"| Time Remaining: {time}".ljust(lineWidth-1) + "|")
     print(f"|".ljust(lineWidth - 1) + "|")
     print(f"| Session x of x".ljust(lineWidth - 1) + "|")
     print(f"| 1. Pause".ljust(lineWidth - 1) + "|")
@@ -103,29 +106,8 @@ def workSession(time):
     print(f"| 3. Help ".ljust(lineWidth - 1) + "|")
     print(line)
 
-def pause_session():
-    pauseTitle = text2art(" Paused ")
-
-    if pauseTitle.endswith("\n"):
-        pauseTitle = pauseTitle[:-1]
-
-    centerPauseTitle = "\n".join(line.center(lineWidth) for line in pauseTitle.split("\n"))
-    print(line)
-    print(centerPauseTitle)
-    print(line)
-    print(f"| Enter the corresponding number to select!".ljust(lineWidth-1) + "|")
-    print(f"|".ljust(lineWidth - 1) + "|")
-    print(f"| State: PAUSED".ljust(lineWidth-1) + "|") 
-   # print(f"| Time Remaining: {time}".ljust(lineWidth-1) + "|")
-    print(f"|".ljust(lineWidth - 1) + "|")
-    print(f"| Session x of x".ljust(lineWidth - 1) + "|")
-    print(f"| 1. Resume".ljust(lineWidth - 1) + "|")
-    print(f"| 2. Home".ljust(lineWidth - 1) + "|")
-    print(f"| 3. Help ".ljust(lineWidth - 1) + "|")
-    print(line)
-
  
-homeInput = int(input("Enter the corresponding number to execute the action: "))
+homeInput = int(input("Enter adjacent number of your choosing: "))
 clear_screen()
 homeCommands = [1, 2, 3]
 
@@ -145,32 +127,59 @@ class Session():
     def info(self):
         return '{} {} {}'.format(self.session_type, self.total_duration, 
                                      self.status)
+    
+    # def start(self):
+    #     while self.remaining_seconds > 0 and not self.stop_event.is_set():
+    #         if self.pause_event.is_set():
+    #             time.sleep(0.1)
+    #             continue
+
+    #         formatted = self.format_time(self.remaining_seconds)
+    #         timer_line = (f"| Time Remaining: {formatted}".ljust(lineWidth-1) + "|")
+    #         status_line = (f"| State: {self.status}".ljust(lineWidth-1) + "|")
+            
+    #         # Move up 8 lines to timer
+    #         print(f"\033[7A\r", end="")
+    #         # Clear line and print timer
+    #         print("\033[2K", end="")
+    #         print(timer_line, end="")
+            
+    #         # Move up 1 more line to status
+    #         print(f"\033[1A\r", end="")
+    #         # Clear line and print status
+    #         print("\033[2K", end="")
+    #         print(status_line, end="", flush=True)
+            
+    #         # Move back down to starting position (9 lines down)
+    #         print(f"\033[8B\r", end="", flush=True)
+
+    #         time.sleep(1)
+    #         self.remaining_seconds -= 1
 
     def start(self):
         while self.remaining_seconds > 0 and not self.stop_event.is_set():
             if self.pause_event.is_set():
-                formatted = self.format_time(self.remaining_seconds)
-                timer_line = (f"| Time Remaining: {formatted}".ljust(lineWidth-1) + "|")
-                status_line = (f"| State: {self.status}".ljust(lineWidth-1) + "|")
-                
-                print(f"\033[8A\r\033[2K", end="")
-                print(status_line)
-                print("\r\033[2K", end="")
-                print(timer_line, end="", flush=True)
-                print(f"\033[7B", end="", flush=True)
-            
-                time.sleep(0.5)
+                time.sleep(0.1)
                 continue
 
             formatted = self.format_time(self.remaining_seconds)
             timer_line = (f"| Time Remaining: {formatted}".ljust(lineWidth-1) + "|")
             status_line = (f"| State: {self.status}".ljust(lineWidth-1) + "|")
             
-            print(f"\033[8A\r\033[2K", end="")
-            print(status_line)
-            print("\r\033[2K", end="")
-            print(timer_line, end="", flush=True)
-            print(f"\033[7B", end="", flush=True)
+            # Move up 7 lines to status line
+            print(f"\033[7A\r", end="")
+            # Clear and print status (with end="" to stay on same line)
+            print("\033[2K", end="")
+            print(status_line, end="")
+            
+            # Move down 1 line to the empty line after status
+            print(f"\033[1B\r", end="")
+            # Clear and print timer
+            print("\033[2K", end="")
+            print(timer_line, end="")
+            
+            # Move back down to starting position (6 lines down from timer)
+            print(f"\033[6B\r", end="", flush=True)
 
             time.sleep(1)
             self.remaining_seconds -= 1
@@ -198,15 +207,15 @@ session_break = Session('BREAK', '10', 'READY')
 
 #print(session_work.info())
 #print(session_break.info())
+clear_screen()
 while homeInput not in homeCommands:
     print("That command does not exist. Please try again!")
-    homeInput = int(input("Enter the corresponding number to execute the action:"))
+    homeInput = int(input("Enter adjacent number of your choosing: "))
     line_count += 2 
 else:
     if homeInput == homeCommands[0]:
-        clear_screen()  # Add this line
         workSession(session_work.format_time(session_work.total_duration))
-        # print()  # Add a blank line for the command prompt
+        print()  # Add a blank line for the command prompt
         
         # start timer in background thread
         timer_thread = threading.Thread(
@@ -216,26 +225,30 @@ else:
         timer_thread.start()
         
         # Give the timer thread a moment to start
-        time.sleep(1.1)
-
+        time.sleep(0.1)
 
         while timer_thread.is_alive():
-            print("\r\033[2K", end="")
-            print("Enter the corresponding number to execute the action: ", end="", flush=True)
+            # Print prompt on the dedicated command line
+            print("\033[1A\r\033[2K", end="")  # Move up 1, go to start, clear line
+            print("Command: ", end="", flush=True)
             
             cmd = input().strip()
-            print("\033[1A\r\033[2K", end="", flush=True)  # Move up 1 to cancel Enter's newline, then clear
             
             if cmd == "1":
                 session_work.toggle_pause()
+
             elif cmd == "2":
                 session_work.stop()
                 break
+
             elif cmd == "3":
+                print("\033[1A\r\033[2K", end="")
                 print("Help: 1=pause/resume, 2=home, 3=help", flush=True)
                 time.sleep(2)
+
             else:
                 if cmd:
+                    print("\033[1A\r\033[2K", end="")
                     print("Invalid command. Try 1, 2, or 3.", flush=True)
                     time.sleep(1.5)
 
@@ -244,3 +257,5 @@ else:
     else:
         print("Are you sure you want to quit?")
         
+
+
